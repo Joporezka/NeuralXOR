@@ -4,15 +4,16 @@
 #include <vector>
 #include <cstdlib>
 using namespace std;
-
+// IDEA: https://habr.com/ru/post/313216/
 /*
  * I0(01)   H0(0)
  *                  O
  * I1(23)   H1(1)
  */
 
-#define speed 0.5
-#define maxEpoch 100
+#define maxEpoch 10
+#define alpha 0.3
+#define trainSpeed 0.7
 
 double fRand(double fMin, double fMax)
 {
@@ -106,31 +107,71 @@ int main() {
 
     error = pow((ideal_xor(input[0],input[1]) - output[1]),2);
 
-    cout<<"Result: "<<output[1]<<endl<<"Error: "<<error<<endl;
+    cout<<"Result(random weights): "<<output[1]<<endl<<"Error: "<<error<<endl;
+
+    cout<<"Training...\n";
 
     //back propagation
 
     double delta_out;
     double delta_hidden[2];
     double delta_inp[2];
+    double deltaw[6]; //delta weight for all 6 neurons
+    double deltaw_previous[6] = {0.0,0.0,0.0,0.0,0.0,0.0};
 
     for(int i=0;i<maxEpoch;i++){ //epoch
+        cout<<"Epoch: "<<i<<endl;
         for(int j=0;j<4;j++){    //run through train set
             network(trainSet[i][0], trainSet[i][1], input, reinterpret_cast<double **>(hidden), syn1, syn2, output, nw);
             ans_bp =nw[0];
             error = nw[1];
-            delta_out =(trainSet[i][2]-ans_bp)* diff_sigm(ans_bp);
-            delta_hidden[0] = diff_sigm(hidden[0][0]) //process
+            delta_out =(trainSet[i][2]-ans_bp)* diff_sigm(ans_bp);  //delta output
+
+            delta_hidden[0] = diff_sigm(hidden[0][0]) * (delta_out*syn2[0]); //delta for H0
+            deltaw[0+4] = trainSpeed*(delta_out*hidden[0][1])+ alpha*deltaw_previous[4]; //delta weight for H0-O
+            deltaw_previous[4] = deltaw[4];
+            syn2[0]+=deltaw[4]; //changing weight
+
+            delta_hidden[1] = diff_sigm(hidden[1][0]) * (delta_out*syn2[1]); //delta for H1
+            deltaw[0+5] = trainSpeed*(delta_out*hidden[1][1])+ alpha*deltaw_previous[5]; //delta weight for H1-O
+            deltaw_previous[5] = deltaw[5];
+            syn2[1]+=deltaw[5]; //changing weight
+
+            //now need to do the same for input layer
+            deltaw[0] = trainSpeed*(delta_hidden[0]*trainSet[i][0])+ alpha*deltaw_previous[0]; //delta weight for I0-H0
+            deltaw_previous[0] = deltaw[0];
+            syn1[0]+=deltaw[0]; //changing weight
+
+            deltaw[1] = trainSpeed*(delta_hidden[1]*trainSet[i][0])+ alpha*deltaw_previous[1]; //delta weight for I0-H1
+            deltaw_previous[1] = deltaw[1];
+            syn1[1]+=deltaw[1]; //changing weight
+
+            deltaw[2] = trainSpeed*(delta_hidden[0]*trainSet[i][1])+ alpha*deltaw_previous[2]; //delta weight for I1-H0
+            deltaw_previous[2] = deltaw[2];
+            syn1[2]+=deltaw[2]; //changing weight
+
+            deltaw[3] = trainSpeed*(delta_hidden[1]*trainSet[i][1])+ alpha*deltaw_previous[3]; //delta weight for I1-H1
+            deltaw_previous[3] = deltaw[3];
+            syn1[3]+=deltaw[3]; //changing weight
+
+            cout<<error<<" ";
+        }
+        cout<<endl;
+    }
+    cout<<"Training completed!"<<endl;
+    while (true){
+        cout<<"Type a,b(2 2 to exit)"<<endl;
+        double testa,testb;
+        cin>>testa>>testb;
+        if(testa<=1 and testb<=1){
+            //do
+            network(testa, testb, input, reinterpret_cast<double **>(hidden), syn1, syn2, output, nw);
+            cout<<"answer: "<<nw[0]<<endl;
+            cout<<"error: "<<nw[1]<<endl;
+        }else{
+            break;
         }
     }
-
-
-
-
-
-
-
-
 
     cout<<"End!\n";
 }
