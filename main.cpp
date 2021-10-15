@@ -40,7 +40,7 @@ double diff_sigm(double x){
     return (1-x)/x;
 }
 
-void network(double in1, double in2,double *input, double **hidden, double *syn1, double *syn2, double *output, double *nw){
+void network(double in1, double in2,double *input, double hidden[][], double *syn1, double *syn2, double *output, double *nw){
     double data[2];
     cout<<"Type a,b(0/1 each)"<<endl;
     //start iteration
@@ -65,16 +65,12 @@ void network(double in1, double in2,double *input, double **hidden, double *syn1
 int main() {
     srand(time(NULL));
     double input[2]; //input neurons
-    double **hidden; //hidden layer
+    double hidden[2][2]; //hidden layer
     double output[2]; //oup neuron
     double out_ideal; //ideal answer (XOR)
     double error; //error
     double ans_bp; // answer
-    double nw[2]; // answer + error (for exporting from network())
-
-    double delta_out;
-    double delta_hidden[2];
-    double delta_inp[2];
+    double nw[2]={0.0,0.0}; // answer + error (for exporting from network())
 
     auto *syn1 = new double[4]();
     auto *syn2 = new double[2]();
@@ -114,12 +110,17 @@ int main() {
 
     //back propagation
 
+    double delta_out;
+    double delta_hidden[2];
+    double delta_inp[2];
+
     for(int i=0;i<maxEpoch;i++){ //epoch
         for(int j=0;j<4;j++){    //run through train set
-            network(trainSet[i][0], trainSet[i][1], input, static_cast<double **>(hidden), syn1, syn2, output, nw);
+            network(trainSet[i][0], trainSet[i][1], input,hidden, syn1, syn2, output, nw);
             ans_bp =nw[0];
             error = nw[1];
-            //in work
+            delta_out =(trainSet[i][2]-ans_bp)* diff_sigm(ans_bp);
+            delta_hidden[0] = diff_sigm(hidden[0][0]) //process
         }
     }
 
