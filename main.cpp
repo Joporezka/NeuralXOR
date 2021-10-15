@@ -41,9 +41,7 @@ double diff_sigm(double x){
     return (1-x)/x;
 }
 
-void network(double in1, double in2,double *input, double **hidden, double *syn1, double *syn2, double *output, double *nw){
-    double data[2];
-    cout<<"Type a,b(0/1 each)"<<endl;
+void network(double in1, double in2,double input[2], double hidden[2][2], double syn1[4], double syn2[2], double output[2], double *nw){
     //start iteration
     input[0] = in1;
     input[1] = in2;
@@ -61,6 +59,25 @@ void network(double in1, double in2,double *input, double **hidden, double *syn1
     nw[0] = output[1];
 
 }
+/*void network(double in1, double in2,double *input, double hidden[2][2], double *syn1, double *syn2, double *output, double *nw){
+    cout<<"Type a,b(0/1 each)"<<endl;
+    //start iteration
+    input[0] = in1;
+    input[1] = in2;
+    //H0 input(0) then H1output
+    hidden[0*2+0] = input[0]*syn1[0] + input[1]*syn1[1];
+    hidden[0*2+1] = sigmoid(hidden[0*2+0]);
+    //also for H1
+    hidden[1*2+0] = input[0]*syn1[2] + input[1]*syn1[3];
+    hidden[1*2+1] = sigmoid(hidden[1*2+0]);
+    //now O neuron
+    output[0] = hidden[0*2+1]*syn2[0]+hidden[1*2+1]*syn2[1];
+    output[1] = sigmoid(output[0]);
+
+    nw[1] = pow((ideal_xor(input[0],input[1]) - output[1]),2);
+    nw[0] = output[1];
+
+}*/
 
 
 int main() {
@@ -122,7 +139,7 @@ int main() {
     for(int i=0;i<maxEpoch;i++){ //epoch
         cout<<"Epoch: "<<i<<endl;
         for(int j=0;j<4;j++){    //run through train set
-            network(trainSet[i][0], trainSet[i][1], input, reinterpret_cast<double **>(hidden), syn1, syn2, output, nw);
+            network(trainSet[i][0], trainSet[i][1], input, hidden, syn1, syn2, output, nw);
             ans_bp =nw[0];
             error = nw[1];
             delta_out =(trainSet[i][2]-ans_bp)* diff_sigm(ans_bp);  //delta output
@@ -159,7 +176,7 @@ int main() {
         cout<<endl;
     }
     cout<<"Training completed!"<<endl;
-    while (true){
+    /*while (true){
         cout<<"Type a,b(2 2 to exit)"<<endl;
         double testa,testb;
         cin>>testa>>testb;
@@ -171,7 +188,7 @@ int main() {
         }else{
             break;
         }
-    }
+    }*/
 
     cout<<"End!\n";
 }
