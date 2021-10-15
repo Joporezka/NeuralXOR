@@ -38,7 +38,7 @@ double ideal_xor(double x,double y){
     }
 }
 double diff_sigm(double x){
-    return (1-x)/x;
+    return (1-x)*x;
 }
 
 void network(double in1, double in2,double input[2], double hidden[2][2], double syn1[4], double syn2[2], double output[2], double *nw){
@@ -46,16 +46,22 @@ void network(double in1, double in2,double input[2], double hidden[2][2], double
     input[0] = in1;
     input[1] = in2;
     //H0 input(0) then H1output
-    hidden[0][0] = input[0]*syn1[0] + input[1]*syn1[1];
+    //hidden[0][0] = input[0]*syn1[0] + input[1]*syn1[1];
+    //hidden[0][1] = sigmoid(hidden[0][0]);
+
+    hidden[0][0] = in1*syn1[0] + in2*syn1[1];
     hidden[0][1] = sigmoid(hidden[0][0]);
     //also for H1
-    hidden[1][0] = input[0]*syn1[2] + input[1]*syn1[3];
+   // hidden[1][0] = input[0]*syn1[2] + input[1]*syn1[3];
+    //hidden[1][1] = sigmoid(hidden[1][0]);
+
+    hidden[1][0] = in1*syn1[2] + in2*syn1[3];
     hidden[1][1] = sigmoid(hidden[1][0]);
     //now O neuron
     output[0] = hidden[0][1]*syn2[0]+hidden[1][1]*syn2[1];
     output[1] = sigmoid(output[0]);
 
-    nw[1] = pow((ideal_xor(input[0],input[1]) - output[1]),2);
+    nw[1] = pow((ideal_xor(in1,in2) - output[1]),2);
     nw[0] = output[1];
 
 }
@@ -85,13 +91,13 @@ int main() {
     double input[2]; //input neurons
     double hidden[2][2]; //hidden layer
     double output[2]; //oup neuron
-    double out_ideal; //ideal answer (XOR)
+    double out_ideal=-1.0; //ideal answer (XOR)
     double error; //error
-    double ans_bp; // answer
+    double ans_bp=-1.0; // answer
     double nw[2]={0.0,0.0}; // answer + error (for exporting from network())
 
-    auto *syn1 = new double[4]();
-    auto *syn2 = new double[2]();
+    double syn1[4] = {0.0,0.0,0.0,0.0};
+    double syn2[2] = {0.0,0.0};
     int trainSet[4][3]= {
             {0,0,0},
             {0,1,1},
@@ -107,8 +113,8 @@ int main() {
 
     //custom data
     cout<<"Type a,b(0/1 each)"<<endl;
-    double a_i,b_i;
-    cin>>a_i,b_i;
+    double a_i=0,b_i=0;
+    cin>>a_i>>b_i;
     //start iteration
     input[0] = a_i;
     input[1] = b_i;
@@ -130,18 +136,39 @@ int main() {
 
     //back propagation
 
-    double delta_out;
-    double delta_hidden[2];
+    double delta_out = 0 ;
+    double delta_hidden[2]={0.0,0.0};
     double delta_inp[2];
-    double deltaw[6]; //delta weight for all 6 neurons
+    double deltaw[6] = {0.0,0.0,0.0,0.0,0.0,0.0}; //delta weight for all 6 neurons
     double deltaw_previous[6] = {0.0,0.0,0.0,0.0,0.0,0.0};
 
     for(int i=0;i<maxEpoch;i++){ //epoch
         cout<<"Epoch: "<<i<<endl;
         for(int j=0;j<4;j++){    //run through train set
-            network(trainSet[i][0], trainSet[i][1], input, hidden, syn1, syn2, output, nw);
-            ans_bp =nw[0];
-            error = nw[1];
+            //network(trainSet[i][0], trainSet[i][1], input, hidden, syn1, syn2, output, nw);
+            //Hidden turns into { {0,0.5},{0,0.5} }
+
+            //copypaste
+
+            input[0] = trainSet[i][0];
+            input[1] = trainSet[i][1];
+            //H0 input(0) then H1output
+            hidden[0][0] = input[0]*syn1[0] + input[1]*syn1[1];
+            hidden[0][1] = sigmoid(hidden[0][0]);
+            //also for H1
+            hidden[1][0] = input[0]*syn1[2] + input[1]*syn1[3];
+            hidden[1][1] = sigmoid(hidden[1][0]);
+            //now O neuron
+            output[0] = hidden[0][1]*syn2[0]+hidden[1][1]*syn2[1];
+            output[1] = sigmoid(output[0]);
+
+            error = pow((ideal_xor(input[0],input[1]) - output[1]),2);
+
+            //copypaste
+
+            ans_bp =output[1];
+            //ans_bp=nw[0];
+            //error = nw[1];
             delta_out =(trainSet[i][2]-ans_bp)* diff_sigm(ans_bp);  //delta output
 
             delta_hidden[0] = diff_sigm(hidden[0][0]) * (delta_out*syn2[0]); //delta for H0
@@ -171,24 +198,24 @@ int main() {
             deltaw_previous[3] = deltaw[3];
             syn1[3]+=deltaw[3]; //changing weight
 
-            cout<<error<<" ";
+            cout<<" "<<error<<" ";
         }
         cout<<endl;
     }
     cout<<"Training completed!"<<endl;
-    /*while (true){
+    while (true){
         cout<<"Type a,b(2 2 to exit)"<<endl;
         double testa,testb;
         cin>>testa>>testb;
         if(testa<=1 and testb<=1){
             //do
-            network(testa, testb, input, reinterpret_cast<double **>(hidden), syn1, syn2, output, nw);
+            network(testa, testb, input, hidden, syn1, syn2, output, nw);
             cout<<"answer: "<<nw[0]<<endl;
             cout<<"error: "<<nw[1]<<endl;
         }else{
             break;
         }
-    }*/
+    }
 
     cout<<"End!\n";
 }
