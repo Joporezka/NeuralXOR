@@ -36,14 +36,46 @@ double ideal_xor(double x,double y){
         return 0.0;
     }
 }
+double diff_sigm(double x){
+    return (1-x)/x;
+}
+
+void network(double in1, double in2,double *input, double **hidden, double *syn1, double *syn2, double *output, double *nw){
+    double data[2];
+    cout<<"Type a,b(0/1 each)"<<endl;
+    //start iteration
+    input[0] = in1;
+    input[1] = in2;
+    //H0 input(0) then H1output
+    hidden[0][0] = input[0]*syn1[0] + input[1]*syn1[1];
+    hidden[0][1] = sigmoid(hidden[0][0]);
+    //also for H1
+    hidden[1][0] = input[0]*syn1[2] + input[1]*syn1[3];
+    hidden[1][1] = sigmoid(hidden[1][0]);
+    //now O neuron
+    output[0] = hidden[0][1]*syn2[0]+hidden[1][1]*syn2[1];
+    output[1] = sigmoid(output[0]);
+
+    nw[1] = pow((ideal_xor(input[0],input[1]) - output[1]),2);
+    nw[0] = output[1];
+
+}
 
 
 int main() {
     srand(time(NULL));
-    double error;
-    double input[2];
-    double hidden[2][2];
-    double output[2];
+    double input[2]; //input neurons
+    double **hidden; //hidden layer
+    double output[2]; //oup neuron
+    double out_ideal; //ideal answer (XOR)
+    double error; //error
+    double ans_bp; // answer
+    double nw[2]; // answer + error (for exporting from network())
+
+    double delta_out;
+    double delta_hidden[2];
+    double delta_inp[2];
+
     auto *syn1 = new double[4]();
     auto *syn2 = new double[2]();
     int trainSet[4][3]= {
@@ -81,6 +113,16 @@ int main() {
     cout<<"Result: "<<output[1]<<endl<<"Error: "<<error<<endl;
 
     //back propagation
+
+    for(int i=0;i<maxEpoch;i++){ //epoch
+        for(int j=0;j<4;j++){    //run through train set
+            network(trainSet[i][0], trainSet[i][1], input, static_cast<double **>(hidden), syn1, syn2, output, nw);
+            ans_bp =nw[0];
+            error = nw[1];
+            //in work
+        }
+    }
+
 
 
 
