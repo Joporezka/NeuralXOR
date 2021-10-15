@@ -40,7 +40,7 @@ double diff_sigm(double x){
     return (1-x)/x;
 }
 
-void network(double in1, double in2,double *input, double hidden[][], double *syn1, double *syn2, double *output, double *nw){
+void network(double in1, double in2,double *input, double **hidden, double *syn1, double *syn2, double *output, double *nw){
     double data[2];
     cout<<"Type a,b(0/1 each)"<<endl;
     //start iteration
@@ -116,7 +116,7 @@ int main() {
 
     for(int i=0;i<maxEpoch;i++){ //epoch
         for(int j=0;j<4;j++){    //run through train set
-            network(trainSet[i][0], trainSet[i][1], input,hidden, syn1, syn2, output, nw);
+            network(trainSet[i][0], trainSet[i][1], input, reinterpret_cast<double **>(hidden), syn1, syn2, output, nw);
             ans_bp =nw[0];
             error = nw[1];
             delta_out =(trainSet[i][2]-ans_bp)* diff_sigm(ans_bp);
