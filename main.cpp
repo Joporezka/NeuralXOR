@@ -70,7 +70,7 @@ int main() {
     hidden[0][0] = input[0]*syn1[0] + input[1]*syn1[1];
     hidden[0][1] = sigmoid(hidden[0][0]);
     //also for H1
-    hidden[1][0] = input[1]*syn1[2] + input[1]*syn1[3];
+    hidden[1][0] = input[0]*syn1[2] + input[1]*syn1[3];
     hidden[1][1] = sigmoid(hidden[1][0]);
     //now O neuron
     output[0] = hidden[0][1]*syn2[0]+hidden[1][1]*syn2[1];
@@ -79,6 +79,8 @@ int main() {
     error = pow((ideal_xor(input[0],input[1]) - output[1]),2);
 
     cout<<"Result: "<<output[1]<<endl<<"Error: "<<error<<endl;
+
+    //back propagation
 
 
 
