@@ -11,9 +11,11 @@ using namespace std;
  * I1(23)   H1(1)
  */
 
-#define maxEpoch 10
-#define alpha 0.3
-#define trainSpeed 0.7
+//full restructuring
+
+#define maxEpoch 5
+#define alpha 0.2
+#define trainSpeed 0.6
 
 double fRand(double fMin, double fMax)
 {
@@ -41,63 +43,38 @@ double diff_sigm(double x){
     return (1-x)*x;
 }
 
-void network(double in1, double in2,double input[2], double hidden[2][2], double syn1[4], double syn2[2], double output[2], double *nw){
-    //start iteration
-    input[0] = in1;
-    input[1] = in2;
+void network(double output_mas[], double input[],double hidden_input[], double hidden_output[], double syn1[],double o_input, double o_output){
     //H0 input(0) then H1output
-    //hidden[0][0] = input[0]*syn1[0] + input[1]*syn1[1];
-    //hidden[0][1] = sigmoid(hidden[0][0]);
-
-    hidden[0][0] = in1*syn1[0] + in2*syn1[1];
-    hidden[0][1] = sigmoid(hidden[0][0]);
+    hidden_input[0] = input[0]*syn1[0] + input[1]*syn1[1];
+    hidden_output[0] = sigmoid(hidden_input[0]);
     //also for H1
-   // hidden[1][0] = input[0]*syn1[2] + input[1]*syn1[3];
-    //hidden[1][1] = sigmoid(hidden[1][0]);
-
-    hidden[1][0] = in1*syn1[2] + in2*syn1[3];
-    hidden[1][1] = sigmoid(hidden[1][0]);
+    hidden_input[1] = input[0]*syn1[2] + input[1]*syn1[3];
+    hidden_output[1] = sigmoid(hidden_input[1]);
     //now O neuron
-    output[0] = hidden[0][1]*syn2[0]+hidden[1][1]*syn2[1];
-    output[1] = sigmoid(output[0]);
+    o_input = hidden_output[0]*syn1[4]+hidden_output[1]*syn1[5];
+    o_output = sigmoid(o_input);
 
-    nw[1] = pow((ideal_xor(in1,in2) - output[1]),2);
-    nw[0] = output[1];
-
+    output_mas[0]=o_output;
+    output_mas[1]= pow((ideal_xor(input[0],input[1]) - o_output),2);
 }
-/*void network(double in1, double in2,double *input, double hidden[2][2], double *syn1, double *syn2, double *output, double *nw){
-    cout<<"Type a,b(0/1 each)"<<endl;
-    //start iteration
-    input[0] = in1;
-    input[1] = in2;
-    //H0 input(0) then H1output
-    hidden[0*2+0] = input[0]*syn1[0] + input[1]*syn1[1];
-    hidden[0*2+1] = sigmoid(hidden[0*2+0]);
-    //also for H1
-    hidden[1*2+0] = input[0]*syn1[2] + input[1]*syn1[3];
-    hidden[1*2+1] = sigmoid(hidden[1*2+0]);
-    //now O neuron
-    output[0] = hidden[0*2+1]*syn2[0]+hidden[1*2+1]*syn2[1];
-    output[1] = sigmoid(output[0]);
 
-    nw[1] = pow((ideal_xor(input[0],input[1]) - output[1]),2);
-    nw[0] = output[1];
-
-}*/
 
 
 int main() {
     srand(time(NULL));
     double input[2]; //input neurons
-    double hidden[2][2]; //hidden layer
-    double output[2]; //oup neuron
+    double hidden_input[2]; //hidden layer
+    double hidden_output[2];
+    double o_input; //oup neuron
+    double o_output;
     double out_ideal=-1.0; //ideal answer (XOR)
     double error; //error
     double ans_bp=-1.0; // answer
-    double nw[2]={0.0,0.0}; // answer + error (for exporting from network())
 
-    double syn1[4] = {0.0,0.0,0.0,0.0};
-    double syn2[2] = {0.0,0.0};
+    double input_neural[2];
+    double output_neural[2];
+
+    double syn1[6] = {0.0,0.0,0.0,0.0,0.0,0.0}; //all synapses
     int trainSet[4][3]= {
             {0,0,0},
             {0,1,1},
@@ -106,31 +83,31 @@ int main() {
     };
 
     //initialize start weights
-    for(int i=0;i<4;i++){
+    for(int i=0;i<6;i++){
         syn1[i]= fRand(0.0,1.0);
-        syn2[i%2] = fRand(0.0,1.0);
     }
 
     //custom data
     cout<<"Type a,b(0/1 each)"<<endl;
-    double a_i=0,b_i=0;
-    cin>>a_i>>b_i;
+    cin>>input_neural[0]>>input_neural[1];
     //start iteration
-    input[0] = a_i;
+    /*input[0] = a_i;
     input[1] = b_i;
     //H0 input(0) then H1output
-    hidden[0][0] = input[0]*syn1[0] + input[1]*syn1[1];
-    hidden[0][1] = sigmoid(hidden[0][0]);
+    hidden_input[0] = input[0]*syn1[0] + input[1]*syn1[1];
+    hidden_output[0] = sigmoid(hidden_input[0]);
     //also for H1
-    hidden[1][0] = input[0]*syn1[2] + input[1]*syn1[3];
-    hidden[1][1] = sigmoid(hidden[1][0]);
+    hidden_input[1] = input[0]*syn1[2] + input[1]*syn1[3];
+    hidden_output[1] = sigmoid(hidden_input[1]);
     //now O neuron
-    output[0] = hidden[0][1]*syn2[0]+hidden[1][1]*syn2[1];
-    output[1] = sigmoid(output[0]);
+    o_input = hidden_output[0]*syn1[4]+hidden_output[1]*syn1[5];
+    o_output = sigmoid(o_input);
 
     error = pow((ideal_xor(input[0],input[1]) - output[1]),2);
 
-    cout<<"Result(random weights): "<<output[1]<<endl<<"Error: "<<error<<endl;
+    cout<<"Result(random weights): "<<output[1]<<endl<<"Error: "<<error<<endl;*/
+
+    network(output_neural,input_neural,hidden_input,hidden_output,syn1,o_input,o_output);
 
     cout<<"Training...\n";
 
@@ -145,41 +122,25 @@ int main() {
     for(int i=0;i<maxEpoch;i++){ //epoch
         cout<<"Epoch: "<<i<<endl;
         for(int j=0;j<4;j++){    //run through train set
-            //network(trainSet[i][0], trainSet[i][1], input, hidden, syn1, syn2, output, nw);
-            //Hidden turns into { {0,0.5},{0,0.5} }
 
-            //copypaste
+            //run network
+            input_neural[0]=trainSet[i][0];
+            input_neural[1]=trainSet[i][1];
+            network(output_neural,input_neural,hidden_input,hidden_output,syn1,o_input,o_output);
 
-            input[0] = trainSet[i][0];
-            input[1] = trainSet[i][1];
-            //H0 input(0) then H1output
-            hidden[0][0] = input[0]*syn1[0] + input[1]*syn1[1];
-            hidden[0][1] = sigmoid(hidden[0][0]);
-            //also for H1
-            hidden[1][0] = input[0]*syn1[2] + input[1]*syn1[3];
-            hidden[1][1] = sigmoid(hidden[1][0]);
-            //now O neuron
-            output[0] = hidden[0][1]*syn2[0]+hidden[1][1]*syn2[1];
-            output[1] = sigmoid(output[0]);
-
-            error = pow((ideal_xor(input[0],input[1]) - output[1]),2);
-
-            //copypaste
-
-            ans_bp =output[1];
-            //ans_bp=nw[0];
-            //error = nw[1];
+            ans_bp =output_neural[0];
+            error = output_neural[1];
             delta_out =(trainSet[i][2]-ans_bp)* diff_sigm(ans_bp);  //delta output
 
-            delta_hidden[0] = diff_sigm(hidden[0][0]) * (delta_out*syn2[0]); //delta for H0
-            deltaw[0+4] = trainSpeed*(delta_out*hidden[0][1])+ alpha*deltaw_previous[4]; //delta weight for H0-O
+            delta_hidden[0] = diff_sigm(hidden_input[0]) * (delta_out*syn1[4]); //delta for H0
+            deltaw[0+4] = trainSpeed*(delta_out*hidden_output[0])+ alpha*deltaw_previous[4]; //delta weight for H0-O
             deltaw_previous[4] = deltaw[4];
-            syn2[0]+=deltaw[4]; //changing weight
+            syn1[4]+=deltaw[4]; //changing weight
 
-            delta_hidden[1] = diff_sigm(hidden[1][0]) * (delta_out*syn2[1]); //delta for H1
-            deltaw[0+5] = trainSpeed*(delta_out*hidden[1][1])+ alpha*deltaw_previous[5]; //delta weight for H1-O
+            delta_hidden[1] = diff_sigm(hidden_input[1]) * (delta_out*syn1[5]); //delta for H1
+            deltaw[0+5] = trainSpeed*(delta_out*hidden_output[1])+ alpha*deltaw_previous[5]; //delta weight for H1-O
             deltaw_previous[5] = deltaw[5];
-            syn2[1]+=deltaw[5]; //changing weight
+            syn1[5]+=deltaw[5]; //changing weight
 
             //now need to do the same for input layer
             deltaw[0] = trainSpeed*(delta_hidden[0]*trainSet[i][0])+ alpha*deltaw_previous[0]; //delta weight for I0-H0
@@ -209,9 +170,11 @@ int main() {
         cin>>testa>>testb;
         if(testa<=1 and testb<=1){
             //do
-            network(testa, testb, input, hidden, syn1, syn2, output, nw);
-            cout<<"answer: "<<nw[0]<<endl;
-            cout<<"error: "<<nw[1]<<endl;
+            input_neural[0]=testa;
+            input_neural[1]=testb;
+            network(output_neural,input_neural,hidden_input,hidden_output,syn1,o_input,o_output);
+            cout<<"answer: "<<output_neural[0]<<endl;
+            cout<<"error: "<<output_neural[1]<<endl;
         }else{
             break;
         }
