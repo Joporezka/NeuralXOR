@@ -13,7 +13,7 @@ using namespace std;
 
 //full restructuring
 
-#define maxEpoch 5
+#define maxEpoch 1000
 #define alpha 0.2
 #define trainSpeed 0.6
 
