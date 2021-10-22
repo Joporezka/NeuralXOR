@@ -4,6 +4,7 @@
 #include <vector>
 #include <cstdlib>
 using namespace std;
+//committed from vscode.dev/GITHUB_NAME
 // IDEA: https://habr.com/ru/post/313216/
 /*
  * I0(01)   H0(0)
